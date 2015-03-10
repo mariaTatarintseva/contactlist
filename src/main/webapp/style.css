@@ -1,0 +1,38 @@
+@CHARSET "UTF-8";
+body {
+    background-color: #E8E8DE;
+    
+}
+.left1 {
+    float: left;
+    width: 20%;
+
+    /*border: 0px solid;*/
+}
+
+.left2 {
+    float: left;
+    width: 5%;
+    padding: 10px;
+    /*border: 0px solid;*/
+    clear: left;
+}
+
+.left3 {
+    float: left;
+    width: 50%;
+    padding: 10px;
+}
+.left4 {
+    float: left;
+    width: 100%;
+
+    /*border: 0px solid;*/
+}
+.just_text {
+    background:rgba(0,0,0,0);
+    border:none;
+}
+.field {clear:both; text-align:right; line-height:25px;}
+label {float:left; padding-right:10px;}
+.main {float:left}

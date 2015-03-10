@@ -1,0 +1,41 @@
+<taglib>
+    <tlib-version>1.0</tlib-version>
+    <jsp-version>2.0</jsp-version>
+    <short-name>Contacts TLD</short-name>
+    <uri>contacts</uri>
+    <tag>
+        <name>contacts</name>
+        <tag-class>servlet.TableViewHelper</tag-class>
+        <body-content>scriptless</body-content>
+        <attribute>
+            <name>onPage</name>
+            <type>int</type>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>page</name>
+            <type>int</type>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+
+    </tag>
+    <tag>
+        <name>phones</name>
+        <tag-class>servlet.PhonesTableViewHelper</tag-class>
+        <body-content>scriptless</body-content>
+        <attribute>
+            <name>id</name>
+            <type>int</type>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+    <tag>
+        <name>result</name>
+        <tag-class>servlet.SearchResultsHelper</tag-class>
+        <body-content>scriptless</body-content>
+        <attribute>
+            <name>ids</name>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+</taglib>
