@@ -1,16 +1,14 @@
 package servlet;
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import commandclasses.Command;
+import dao.DataAccessObject;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Properties;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -24,24 +22,24 @@ public class FrontController extends HttpServlet {
 	private static final long serialVersionUID = 1L;
     private final static Logger logger= LogManager.getLogger(FrontController.class);
     protected void processRequest(HttpServletRequest req, HttpServletResponse resp) {
-        if (!DataAccessObject.isInit()) {
-            DataAccessObject.setInit(true);
-        Properties properties = new Properties();
-    InputStream inputStream =getServletContext().getResourceAsStream("/WEB-INF/properties/contactlist.properties");
-        try {
-            properties.load(inputStream);
-            String user = properties.getProperty("databaseUser");
-            DataAccessObject.setUSER(user);
-            DataAccessObject.setURL(properties.getProperty("databaseURL"));
-
-        } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        }
-        }
+//        if (!DataAccessObject.isInit()) {
+//            DataAccessObject.setInit(true);
+//        Properties properties = new Properties();
+//    InputStream inputStream =getServletContext().getResourceAsStream("/WEB-INF/properties/contactlist.properties");
+//        try {
+//            properties.load(inputStream);
+//            DataAccessObject.setUSER(properties.getProperty("databaseUser"));
+//            DataAccessObject.setPASSWORD(properties.getProperty("databasePassword"));
+//            DataAccessObject.setURL(properties.getProperty("databaseURL"));
+//            DataAccessObject.setDRIVER(properties.getProperty("databaseDriver"));
+//        } catch (IOException e) {
+//            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+//        }
+//        }
         logger.log(Level.DEBUG, "processRequest()");
         String className;
         if (req.getParameter("command") == null) {
-            className = "servlet.Error";
+            className = "commandclasses.Error";
             if (ServletFileUpload.isMultipartContent(req)) {
 //                try
 //                {
@@ -68,7 +66,7 @@ public class FrontController extends HttpServlet {
 //                            //your code for getting multipart
 //                        }
 //                    }
-                className = this.getClass().getPackage().getName()+".FileUpload";
+                className = "commandclasses.FileUpload";
 
             } else {
             //handle a mistake
@@ -81,7 +79,7 @@ public class FrontController extends HttpServlet {
 
             }
         } else {
-            className = String.format("%s.%s", this.getClass().getPackage().getName(), req.getParameter("command"));
+            className = String.format("commandclasses.%s", req.getParameter("command"));
             //this.getClass().getClassLoader().getResource("servlet")
         }
        // System.out.print(className);

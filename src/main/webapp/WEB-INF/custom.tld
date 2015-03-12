@@ -5,7 +5,7 @@
     <uri>contacts</uri>
     <tag>
         <name>contacts</name>
-        <tag-class>servlet.TableViewHelper</tag-class>
+        <tag-class>view.TableViewHelper</tag-class>
         <body-content>scriptless</body-content>
         <attribute>
             <name>onPage</name>
@@ -21,7 +21,7 @@
     </tag>
     <tag>
         <name>phones</name>
-        <tag-class>servlet.PhonesTableViewHelper</tag-class>
+        <tag-class>view.PhonesTableViewHelper</tag-class>
         <body-content>scriptless</body-content>
         <attribute>
             <name>id</name>
@@ -31,7 +31,7 @@
     </tag>
     <tag>
         <name>result</name>
-        <tag-class>servlet.SearchResultsHelper</tag-class>
+        <tag-class>view.SearchResultsHelper</tag-class>
         <body-content>scriptless</body-content>
         <attribute>
             <name>ids</name>

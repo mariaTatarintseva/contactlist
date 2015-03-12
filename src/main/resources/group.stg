@@ -1,11 +1,5 @@
-t1(arg1,arg2) ::= "template1 <arg1> <arg2>" // single-line template
+t1(arg1,arg2, arg3) ::= "Здравствуйте, <arg1>!
+ <arg2>
 
-// multi line template
-t2(arg1) ::= <<  
-template2 <arg1>
->>
-
-// multi line template that ignores indentation and newlines
-t3(arg1) ::= <%
-template3 <arg1>
-%>
+ С наилучшими пожеланиями,
+ <arg3>" // single-line template

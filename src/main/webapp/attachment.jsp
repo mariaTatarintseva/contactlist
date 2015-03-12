@@ -16,8 +16,8 @@
             </head>
   <body>
   <%
-      String id = request.getParameter("id");
-      pageContext.setAttribute("id", id);
+      int id = Integer.valueOf(request.getParameter("id"));
+     // pageContext.setAttribute("id", id);
 
   %>
     <form method = "post" action="FrontController" enctype="multipart/form-data">
@@ -28,7 +28,7 @@
             <br/><br/>
             <input type="hidden" name="command" value="FileUpload">
             <input type="hidden" name="directory" value="attachments">
-            <input type="hidden" name="id" id="id" value="${id}">
+            <input type="hidden" name="id" id="id" value=<%=id%>>
 
             <input type="submit" value="Сохранить">
             <%--            <input type="submit" value="Upload">--%>

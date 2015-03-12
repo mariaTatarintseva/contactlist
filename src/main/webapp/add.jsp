@@ -1,11 +1,13 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="tbl" uri="contacts" %>
-<%@ page import="servlet.Contact" %>
+<%@ page import="dataclasses.Contact" %>
 <%@ page import="com.mysql.jdbc.StringUtils" %>
-<%@ page import="servlet.PhoneNumber" %>
-<%@ page import="java.io.File" %>
-<%@ page import="servlet.DataAccessObject" %>
+<%@ page import="dao.DataAccessObject" %>
 <%@ page import="java.util.ArrayList" %>
+<%@ page import="org.apache.commons.fileupload.disk.DiskFileItemFactory" %>
+<%@ page import="java.io.File" %>
+<%@ page import="org.apache.commons.fileupload.servlet.ServletFileUpload" %>
+<%@ page import="org.apache.commons.fileupload.FileItem" %>
 <%@ page language="java" contentType="text/html; charset=utf-8"
     pageEncoding="utf-8"%>
 <%@ page isELIgnored="false"%>
@@ -16,7 +18,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
    <link rel="stylesheet" type="text/css" href="style.css">
     <script src="<c:url value="/resources/js/add.js" />"></script>
-<title>Добавить контакт</title>
+<title>Редактировать контакт</title>
 </head>
 <body>
 
@@ -24,11 +26,7 @@
 <%
     Contact contact;
     String buttonText = "Сохранить";
-//    String phones="";
-//    String types="";
-//    String comments="";
     Integer contactId = null;
- //   ArrayList<PhoneNumber> phoneNumbers;
     if (request.getParameter("id") == null) {
         contact = new Contact();
         contact.setName("");
@@ -48,29 +46,58 @@
         photo = contact.getPhoto();
     }
     System.out.print("Photo: " + photo);
- /*   String imagePath = (new File(request.getServletContext().getRealPath("")
-            + File.separator + UPLOAD_DIRECTORY +File.separator + contact.getId() + ".gif" )).exists() ?
-            "avatars/" + contact.getId() + ".gif" : "img/incognito.gif";
-     System.out.println("Size: " + contact.getPhoneNumbers().size());    */
-    String[] months = {"января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря"};
+    String[] months = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
     pageContext.setAttribute("months", months);
+
+    String[] family = {"NOT SPECIFIED", "DIVORCED", "DATING", "MARRIED", "SINGLE", "WIDOW"};
+    pageContext.setAttribute("family", family);
+
+
     ArrayList<Integer> list = DataAccessObject.getPhonesOf(contactId);
     Integer[] phones = list.toArray(new Integer[list.size()]);
     pageContext.setAttribute("phones", phones);
     pageContext.setAttribute("photo", photo);
     int month = contact.getBirthday() == null ? 1 : contact.getBirthday().getMonthOfYear();
     pageContext.setAttribute("choice", month);
+
+    int fam = contact.getFamilyStatus() == null ? 0: contact.getFamilyStatus().ordinal();
+    pageContext.setAttribute("fam", fam);
+
+//    //upload photo
+//    if (!StringUtils.isNullOrEmpty(photo)) {
+//    DiskFileItemFactory factory = new DiskFileItemFactory();
+//    factory.setRepository(new File(System.getProperty("java.io.tmpdir")));
+//    ServletFileUpload upload = new ServletFileUpload(factory);
+//    FileItem fileItem = factory.createItem(null, null, false, photo);
+//    String uploadPath =  request.getServletContext().getRealPath("") + File.separator + "photo";
+//        File uploadDir = new File(uploadPath);
+//        if (!uploadDir.exists()) {
+//            uploadDir.mkdir();
+//        }
+//                File storeFile = new File(photo+File.separator + "1.gif");
+//                fileItem.write(storeFile);
+//    }
+
+
 %>
-<input id="photoButton" type="image" onclick="addPhoto()" src =<%= photo == null ? "img/incognito.gif" : photo%> />
- <form action="FrontController" method = "post" name="adding" onsubmit="return saveChanges(phones)">
+<div id="header">
+    <h1>Редактирование контакта</h1>
+</div>
+<div id="container">
+<div id = "nav">
+    <button type="button" class="ref" onclick="openPhone()">Добавить Номер</button>
+    <button type="button" class="ref" onclick="openAttachment()">Присоединить файл</button>
+</div>
+<div id="content">
+<input id="photoButton" type="image" onclick="addPhoto()" src =<%= photo == null ? "img/incognito.gif" : "photo"%> />
+ <form action="FrontController" method = "post" name="adding" onsubmit="return saveChanges(phones)" accept-charset="utf-8">
      <input type="hidden" name="command" value="SaveContact">
      <div class="main">
    <div class="field"><label for="name"> Имя*</label> <input name ="name" id="name" required = "true" value=<%=contact.getName()%>></div>
    <div class="field"><label for="surname">Фамилия* </label> <input name ="surname" id="surname" required = "true" value=<%=contact.getSurname()%>></div>
    <div class="field"><label for="fathername"> Отчество </label><input name ="fathername" id="fathername" value=<%=StringUtils.isNullOrEmpty(contact.getParentName()) ? contact.getParentName() : ""%>></div>
-    <label for="day">Дата рождения <input type ="text" name ="day" id="day" value=<%=contact.getBirthday() == null ? "" : contact.getBirthday().getDayOfMonth()%>> </label>
-       <tr>
-           <td>
+         <div class="field"><label for="year">Дата рождения </label><input type ="text" name ="day" id="day" size="2" value=<%=contact.getBirthday() == null ? "" : contact.getBirthday().getDayOfMonth()%>> </div>
+
        <select name="months" size="1">
        <c:forEach var="month" begin="1" end="12">
            <c:choose>
@@ -82,30 +109,45 @@
            </c:otherwise>
            </c:choose>
        </c:forEach>
-           </td>
-           </tr>
    </select>
-       <input type ="text" name ="year" id ="year" value=<%=contact.getBirthday() == null ? "" : contact.getBirthday().getYear()%>>
-   </div>
+       <input type ="text" name ="year" id ="year" size="4" value=<%=contact.getBirthday() == null ? "" : contact.getBirthday().getYear()%>>
 
-         <p> Пол<input type = "radio" name ="gender" id ="gender" value="female">женский<input type = "radio" name ="gender" value="male">мужской</p>
-         <p> Гражданство<input name ="citizenship" id="citizenship" value=<%=contact.getCitizenship() == null? "" : contact.getCitizenship()%>></p>
-     <div class="main">
-         <div class="field"><label for="family"> Семейное положение </label><input name ="family" id="family"></div>
+          <%if (contact.getGender() == Contact.Gender.FEMALE) {%>
+         <div class="field"><label for="gender"> Пол</label><input type = "radio" name ="gender" value="FEMALE" checked>женский<input type = "radio" name ="gender" value="MALE">мужской</div>
+
+         <%} else {%>
+         <div class="field"><label for="gender"> Пол</label><input type = "radio" name ="gender" id ="gender" value="FEMALE">женский<input type = "radio" name ="gender" value="MALE" checked>мужской</div>
+
+         <%}%>
+         <div class="field"><label for="citizenship"> Гражданство</label><input type="text" name ="citizenship" id="citizenship" value=<%=contact.getCitizenship() == null? "" : contact.getCitizenship()%>></div>
+
+         <div class="field"><label for="family"> Семейное положение </label>
+             <select name="family" id ="family" size="1">
+                 <c:forEach var="f" begin="0" end="4">
+                     <c:choose>
+                         <c:when test="${f == fam}">
+                             <option value="${f}" selected="selected">${family[f]}</option>
+                         </c:when>
+                         <c:otherwise>
+                             <option value="${f}">${family[f]}</option>
+                         </c:otherwise>
+                     </c:choose>
+                 </c:forEach>
+             </select></div>
          <div class="field"><label for="webSite"> Web Site </label><input name ="webSite" id="webSite" value=<%=contact.getWebSite() == null? "" : contact.getWebSite()%>></div>
-     </div>
-         <p>Email <input name ="email" id="email" value=<%=contact.getEmail() == null ? "" : contact.getEmail() %>></p>
-   <p>Текущее место работы <input name ="job" id="job" value=<%=contact.getJob()== null ? "" : contact.getJob()%>></p>
-   <br>Адрес
-   <p>Страна <input name ="country" id="country" value=<%=contact.getAddress() == null? "" : contact.getAddress().getCountry()%>></p>
-   <p>Город <input name ="town" id="town" value=<%=contact.getAddress() == null? "" : contact.getAddress().getTown()%>></p>
-   <p>Улица <input name ="street" id="street" value=<%=contact.getAddress() == null? "" : contact.getAddress().getStreet()%>></p>
-   <p>Дом <input name ="house" id="house" value=<%=contact.getAddress() == null? "" : contact.getAddress().getHouse()%>></p>
-   <p>Квартира <input name ="place" id="place" value=<%=contact.getAddress() == null? "" : contact.getAddress().getPlace()%>></p>
-   <p>Индекс <input name ="postIndex" id="postIndex" value=<%=contact.getAddress() == null? "" : contact.getAddress().getPostIndex()%>></p>
+
+     <div class="field"><label for="email"> Email </label><input name ="email" id="email" value=<%=contact.getEmail() == null ? "" : contact.getEmail() %>></div>
+     <div class="field"><label for="job"> Текущее место работы </label><input name ="job" id="job" value=<%=contact.getJob()== null ? "" : contact.getJob()%>></div>
+     <div class="field"><label>Адрес</label></div>
+     <div class="field"><label for="country"> Страна </label><input name ="country" id="country" value=<%=contact.getAddress() == null? "" : contact.getAddress().getCountry()%>></div>
+     <div class="field"><label for="town"> Город </label><input name ="town" id="town" value=<%=contact.getAddress() == null || StringUtils.isNullOrEmpty(contact.getAddress().getTown())? "" : contact.getAddress().getTown()%>></div>
+     <div class="field"><label for="street"> Улица </label><input name ="street" id="street" value=<%=contact.getAddress() == null|| StringUtils.isNullOrEmpty(contact.getAddress().getStreet())? "" : contact.getAddress().getStreet()%>></div>
+     <div class="field"><label for="house">Дом</label> <input name ="house" id="house" value=<%=contact.getAddress() == null || contact.getAddress().getHouse() == null? "" : contact.getAddress().getHouse()%>></div>
+     <div class="field"><label for="place"> Квартира </label><input name ="place" id="place" value=<%=contact.getAddress() == null|| contact.getAddress().getPlace() == null? "" : contact.getAddress().getPlace()%>></div>
+     <div class="field"><label for="postIndex"> Индекс </label><input name ="postIndex" id="postIndex" value=<%=contact.getAddress() == null|| contact.getAddress().getPostIndex() == null? "" : contact.getAddress().getPostIndex()%>></div>
 
      <input type="hidden" name="phones" id="phones" value=""/>
-     <input type="hidden" name="id" id="id" value="<%=contactId%>"/>
+     <input type="hidden" name="id" id="id" value=<%=contactId%>>
      <input type="hidden" name="types" id="types" value=""/>
      <input type="hidden" name="comments" id="comments" value=""/>
      <input type="hidden" name="ids" id="ids" value=""/>
@@ -114,13 +156,18 @@
      <input type="hidden" name="commentsO" id="commentsO" value=""/>
      <input type="hidden" name="photo" id="photo" value="${photo}"/>
      <input type="submit" value="<%=buttonText%>">
-
+     <button type="button" onclick="removeSelected()">Удалить выбранные телефоны</button>
+     </div>
  </form>
+
+
 <input type="hidden" id="last" value="<%=contact.getPhoneNumbers().size()%>"/>
 <tbl:phones id="<%=contactId == null ? 0: contactId%>"></tbl:phones>
-<button value = "button" onclick="openPhone()">Добавить Номер</button>
-<button value = "button" onclick="openAttachment()">Присоединить файл</button>
-<button value = "button" onclick="removeSelected()">Удалить выбранные</button>
+ </div>
+</div>
+<div id="footer">
+    iTechArt 2015
+</div>
 
 </body>
 </html>

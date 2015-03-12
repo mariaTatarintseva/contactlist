@@ -2,7 +2,8 @@
     pageEncoding="utf-8"
     import = "java.util.*"
     %>
-<%@ page import="servlet.DataAccessObject" %>
+<%@ page import="dao.DataAccessObject" %>
+<%@ page import="java.io.InputStream" %>
 <%@ page isELIgnored="false"%>
 <%@ taglib prefix="tbl" uri="contacts"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
@@ -18,6 +19,16 @@
 
 <body onload="initializePages()">
 <%
+    if (!DataAccessObject.isInit()) {
+        Properties properties = new Properties();
+        InputStream inputStream =request.getServletContext().getResourceAsStream("/WEB-INF/properties/contactlist.properties");
+        properties.load(inputStream);
+        DataAccessObject.setUSER(properties.getProperty("databaseUser"));
+        DataAccessObject.setPASSWORD(properties.getProperty("databasePassword"));
+        DataAccessObject.setURL(properties.getProperty("databaseURL"));
+        DataAccessObject.setDRIVER(properties.getProperty("databaseDriver"));
+        DataAccessObject.setInit(true);
+    }
    int pageNumber, onPage;
     onPage=10;
     String ids = "null";
@@ -35,36 +46,42 @@
    // onPage = 10; //get from properties file
     int total = DataAccessObject.total();
 
+
+
 %>
 
 
+<div id="header">
+    <h1>Список контактов</h1>
+</div>
+<div id="container">
+<div id = "nav">
+    <a href="add.jsp" class="ref">Добавить контакт</a> <br>
+    <%--<input type="hidden" name="command" value="AddContact">--%>
+    <%--<input type="submit" value="">--%>
+    <a href="search.jsp" class="ref">Поиск по контактам</a>
+</div>
 
+     <div id="content">
 
- <div>
   <form action="FrontController">
-<div>
+
       <%if ("null".equals(ids))     { %>
 
   <tbl:contacts onPage="<%=onPage%>" page="<%=pageNumber%>" />
       <% }  else {%>
       <tbl:result ids="<%=ids%>"/>
       <%}%>
-</div>
+
 <input type="hidden" name="command" id='com' value="DefaultValue">
 <input type="hidden" id='onPage' value="10">
 <input type="hidden" id='page' value="0">
-<input type="submit" value="Удалить выбранные" onclick="removeSelected()">
-<input type="submit" value="Написать письмо выбранным" onclick="emailToSelected()">
- </form>
-     </div>
 
-<form action="add.jsp">
-    <%--<input type="hidden" name="command" value="AddContact">--%>
-    <input type="submit" value="Добавить контакт">
-</form>
-<form action="search.jsp">
-    <input type="submit" value="Поиск по контактам">
-</form>
+<input type="submit" value="Удалить выбранные" onclick="removeSelected()">
+
+ </form>
+<button type="button" onclick="emailToSelected()">Написать письмо выбранным</button>
+<p>
 <table>
     <tr>
     <c:forEach var="i" begin="0" end="<%=(total-1)/onPage%>">
@@ -80,8 +97,13 @@
       </td>
  </c:forEach>
     </tr>
-</table>
+</table> </p>
+ </div>
 
+<div id="footer">
+    iTechArt 2015
+</div>
+</div>
 </body>
 </html>
 

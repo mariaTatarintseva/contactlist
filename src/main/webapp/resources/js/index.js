@@ -18,7 +18,19 @@ function initializePages() {
         document.submit();
     }
 function emailToSelected() {
-    document.getElementById('com').value = 'Email';
-    document.submit();
+    var ref = "email.jsp?";
+    var checks = document.getElementsByName('remove');
+    var ch = 0;
+    for (var i=0; checks[i]; ++i) {
+         if (checks[i].checked) {
+             ch++;
+            ref=ref.concat("to=", checks[i].value, "&");
+         }
+    }
+    if (ch>0) {
+    window.location.href=ref;
+    }
+//    document.getElementById('com').value = 'Email';
+//    document.submit();
 }
 

@@ -6,34 +6,50 @@
  * To change this template use File | Settings | File Templates.
  */
 function addNewPhone() {
-   // alert('addNewPhone');
+    var valid = validate();
+   // alert(valid);
+    if (!valid) {
+        return;
+    }
     var id =  parseInt(window.opener.document.getElementById("last").value);
     window.opener.document.getElementById("last").value=id+1;
-   // alert(document.getElementById("country").value);
-    var number = document.getElementById("country").value + '(' + document.getElementById("operator").value +  ')' +
+    var number = document.getElementById("country").value + '\t' + document.getElementById("operator").value +  '\t' +
         document.getElementById("number").value;
-  //  alert(number);
     var comment = document.getElementById("comment").value;
     var type =  document.getElementById("cell").checked ? "CELL" : "HOME";
     var div2 = window.opener.document.createElement('div');
     var checkBox = window.opener.document.createElement('input');
-    var divN = window.opener.document.createElement('span');
+    var divN = window.opener.document.createElement('div');
     divN.innerHTML = number;
     divN.id = "divN" + id;
-    var divT = window.opener.document.createElement('span');
+    var divT = window.opener.document.createElement('div');
     divT.innerHTML = type;
     divT.id = "divT" + id;
-    var divC = window.opener.document.createElement('span');
+    var divC = window.opener.document.createElement('div');
     divC.innerHTML = comment;
     divC.id = "divC" + id;
     checkBox.type = "checkBox";
-    //  checkBox.setName("newPhone");
     checkBox.name = "newPhone";
-    // div2.innerHTML = number + "\t"  + type + "\t" + comment;
+    div2.setAttribute("class", "row");
+    divC.setAttribute("class", "col c20");
+    divN.setAttribute("class", "col c20");
+    divT.setAttribute("class", "col c20");
     div2.appendChild(checkBox);
     div2.appendChild(divN);
     div2.appendChild(divT);
     div2.appendChild(divC);
-    window.opener.document.body.appendChild(div2);
+    window.opener.document.getElementById("content").appendChild(div2);
     window.close();
+}
+function validate()
+{
+    var country = document.getElementById("country").value;
+    var operator = document.getElementById("operator").value;
+    var number = document.getElementById("number").value;
+    if(isNaN(country) || isNaN(operator)|| isNaN(number)) {
+        alert("Номер может содержать только цифры.");
+        return false;
+    }    else {
+    return true;
+    }
 }

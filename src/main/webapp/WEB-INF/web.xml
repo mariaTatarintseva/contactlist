@@ -17,11 +17,12 @@ http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
   	<servlet-name>FrontController</servlet-name>
   	<url-pattern>/FrontController</url-pattern>
   </servlet-mapping>
-    <!--<jsp-config>-->
-        <!--<taglib>-->
-            <!--<taglib-uri>contacts</taglib-uri>-->
-            <!--<taglib-location>/WEB-INF/custom.tld</taglib-location>-->
-        <!--</taglib>-->
-    <!--</jsp-config>-->
+    <resource-ref>
+        <description>ContactList</description>
+        <res-ref-name>jdbc/contacts_tatarintseva</res-ref-name>
+        <res-type>javax.sql.DataSource</res-type>
+        <res-auth>Container</res-auth>
+    </resource-ref>
+
 
 </web-app>
