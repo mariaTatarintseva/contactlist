@@ -35,6 +35,7 @@ public class FileUpload extends Command {
     public void process() {
         logger.log(Level.DEBUG, "process");
 
+
         Properties properties = new Properties();
         InputStream inputStream = context.getResourceAsStream("/WEB-INF/properties/contactlist.properties");
         try {
@@ -47,7 +48,7 @@ public class FileUpload extends Command {
                 logger.log(Level.ERROR, e1.getMessage());
             }
         }
-        UPLOAD_DIRECTORY = properties.getProperty("uploadDirectory");
+        UPLOAD_DIRECTORY = Command.getResourcesPath(req);
         final int MAX_FILESIZE = Integer.valueOf(properties.getProperty("maxFileSize"));
         final int MAX_REQUESTSIZE = Integer.valueOf(properties.getProperty("maxRequestSize"));
         final int MEMORY_THRESHOLD = Integer.valueOf(properties.getProperty("memoryThreshold"));
@@ -74,6 +75,7 @@ public class FileUpload extends Command {
         ServletFileUpload upload = new ServletFileUpload(factory);
         String fileName = null;
         String filePath = null;
+        String filePath2 = null;
         upload.setFileSizeMax(MAX_FILESIZE);
         upload.setSizeMax(MAX_REQUESTSIZE);
 
@@ -109,20 +111,30 @@ public class FileUpload extends Command {
                     }
 
                 String photo = String.format("%s%d", LocalDate.now().toString(), LocalDateTime.now().getMillisOfDay());
-                String uploadPath =  UPLOAD_DIRECTORY + File.separator + directory + "-" + photo;
+                String uploadPath =  String.format("%s%s%s%s", Command.getResourcesPath(req), directory, File.separator, photo);
+                String uploadPath2 = String.format("%s%sresources%s%s%s%s", context.getRealPath(""), File.separator, File.separator, directory, File.separator, photo);
+
                 File uploadDir = new File(uploadPath);
+                File uploadDir2 = new File(uploadPath2);
                 if (!uploadDir.exists()) {
                     uploadDir.mkdir();
+                }
+                if (!uploadDir2.exists()) {
+                    uploadDir2.mkdir();
                 }
              for (FileItem item : formItems) {
              if (!item.isFormField()) {
                  fileName = new File(item.getName()).getName();
                  filePath = String.format("%s%s%s",uploadPath , File.separator, fileName);
+                 filePath2 = String.format("%s%s%s",uploadPath2 , File.separator, fileName);
+
                  File storeFile = new File(filePath);
+                 File storeFile2 = new File(filePath2);
                  if ("avatars".equals(directory)) {
-                 req.getSession().setAttribute("photo", filePath);//String.format("avatars/%s/%s", photo , fileName));
+                 req.getSession().setAttribute("photo", String.format("%s/%s/%s", directory, photo, fileName));//String.format("avatars/%s/%s", photo , fileName));
                  }
              item.write(storeFile);
+                 item.write(storeFile2);
                 }
                 }
                 }

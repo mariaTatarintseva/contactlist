@@ -1,13 +1,9 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="tbl" uri="contacts" %>
 <%@ page import="dataclasses.Contact" %>
-<%@ page import="com.mysql.jdbc.StringUtils" %>
 <%@ page import="dao.DataAccessObject" %>
 <%@ page import="java.util.ArrayList" %>
-<%@ page import="org.apache.commons.fileupload.disk.DiskFileItemFactory" %>
-<%@ page import="java.io.File" %>
-<%@ page import="org.apache.commons.fileupload.servlet.ServletFileUpload" %>
-<%@ page import="org.apache.commons.fileupload.FileItem" %>
+<%@ page import="com.mysql.jdbc.StringUtils" %>
 <%@ page language="java" contentType="text/html; charset=utf-8"
     pageEncoding="utf-8"%>
 <%@ page isELIgnored="false"%>
@@ -38,7 +34,7 @@
         contactId = Integer.valueOf(request.getParameter("id"));
     }
     String photo=null;
-    if (request.getSession().getAttribute("photo") != null) {
+    if (!StringUtils.isNullOrEmpty((String)request.getSession().getAttribute("photo"))) {
         photo = (String) request.getSession().getAttribute("photo");
         request.getSession().removeAttribute("photo");
         contact.setPhoto(photo);
@@ -63,20 +59,6 @@
     int fam = contact.getFamilyStatus() == null ? 0: contact.getFamilyStatus().ordinal();
     pageContext.setAttribute("fam", fam);
 
-//    //upload photo
-//    if (!StringUtils.isNullOrEmpty(photo)) {
-//    DiskFileItemFactory factory = new DiskFileItemFactory();
-//    factory.setRepository(new File(System.getProperty("java.io.tmpdir")));
-//    ServletFileUpload upload = new ServletFileUpload(factory);
-//    FileItem fileItem = factory.createItem(null, null, false, photo);
-//    String uploadPath =  request.getServletContext().getRealPath("") + File.separator + "photo";
-//        File uploadDir = new File(uploadPath);
-//        if (!uploadDir.exists()) {
-//            uploadDir.mkdir();
-//        }
-//                File storeFile = new File(photo+File.separator + "1.gif");
-//                fileItem.write(storeFile);
-//    }
 
 
 %>
@@ -89,7 +71,7 @@
     <button type="button" class="ref" onclick="openAttachment()">Присоединить файл</button>
 </div>
 <div id="content">
-<input id="photoButton" type="image" onclick="addPhoto()" src =<%= photo == null ? "img/incognito.gif" : "photo"%> />
+<input id="photoButton" type="image" style="width:25%;" onclick="addPhoto()" src =<%= photo == null ? "resources/avatars/incognito.gif" : "resources/" + photo%> />
  <form action="FrontController" method = "post" name="adding" onsubmit="return saveChanges(phones)" accept-charset="utf-8">
      <input type="hidden" name="command" value="SaveContact">
      <div class="main">
@@ -162,12 +144,14 @@
 
 
 <input type="hidden" id="last" value="<%=contact.getPhoneNumbers().size()%>"/>
-<tbl:phones id="<%=contactId == null ? 0: contactId%>"></tbl:phones>
- </div>
+
+    <tbl:phones id="<%=contactId == null ? 0: contactId%>"></tbl:phones>
 </div>
-<div id="footer">
-    iTechArt 2015
+    <div id="footer">
+        iTechArt 2015
+    </div>
 </div>
+
 
 </body>
 </html>

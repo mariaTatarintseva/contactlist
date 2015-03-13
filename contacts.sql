@@ -29,11 +29,11 @@ CREATE TABLE `adress` (
   `place` int(10) unsigned DEFAULT NULL,
   `post_index` int(10) unsigned DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=67 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=69 DEFAULT CHARSET=utf8;
 
 /*Data for the table `adress` */
 
-insert  into `adress`(`id`,`country`,`town`,`street`,`house`,`place`,`post_index`) values (56,'Belarus','Minsk','Kirova',NULL,NULL,220030),(57,'','','',NULL,NULL,NULL),(58,'','Moscow','',NULL,NULL,NULL),(59,'France','Paris',NULL,NULL,NULL,NULL),(60,NULL,NULL,NULL,NULL,NULL,NULL),(61,'','St. Petersburg','',NULL,NULL,NULL),(62,'','','',NULL,NULL,NULL),(63,'','','',NULL,NULL,NULL),(64,'','','',NULL,NULL,NULL),(65,'','','',NULL,NULL,NULL),(66,'','','',NULL,NULL,NULL);
+insert  into `adress`(`id`,`country`,`town`,`street`,`house`,`place`,`post_index`) values (56,'Belarus','Minsk','Kirova',NULL,NULL,220030),(57,'','','',NULL,NULL,NULL),(58,'','Moscow','',NULL,NULL,NULL),(59,'France','Paris',NULL,NULL,NULL,NULL),(60,NULL,NULL,NULL,NULL,NULL,NULL),(61,'','St.','',NULL,NULL,NULL),(62,'','','',NULL,NULL,NULL),(63,'','','',NULL,NULL,NULL),(64,'','','',NULL,NULL,NULL),(65,'','','',NULL,NULL,NULL),(66,'','','',NULL,NULL,NULL),(67,'','','',NULL,NULL,NULL),(68,'','','',NULL,NULL,NULL);
 
 /*Table structure for table `attachment` */
 
@@ -75,11 +75,11 @@ CREATE TABLE `contact` (
   KEY `ID` (`ID`),
   KEY `contact_ibfk_1` (`adress_id`),
   CONSTRAINT `contact_ibfk_1` FOREIGN KEY (`adress_id`) REFERENCES `adress` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=60 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=61 DEFAULT CHARSET=utf8;
 
 /*Data for the table `contact` */
 
-insert  into `contact`(`ID`,`NAME`,`SURNAME`,`FATHERNAME`,`BIRTHDAY`,`JOB`,`PHOTO`,`EMAIL`,`adress_id`,`GENDER`,`FAMILY`,`CITIZENSHIP`,`WEBSITE`) values (49,'Ivan','Ivanov',NULL,'1990-01-12','BSU',NULL,'email1@contacts.com',56,'MALE','MARRIED',NULL,NULL),(50,'Petr','Petrov',NULL,'1990-01-10',NULL,NULL,NULL,57,'MALE','NOT_SPECIFIED',NULL,NULL),(51,'Elena','Sidorova',NULL,NULL,NULL,NULL,'elena@abc.com',58,'FEMALE','DIVORCED',NULL,NULL),(52,'Pierre','Levacances',NULL,NULL,'IBM',NULL,'pierre@gmail.com',59,'MALE','','french',NULL),(53,'Serge','Levacances',NULL,NULL,'IBM',NULL,'pierre@gmail.com',60,'MALE','','french',NULL),(54,'Vasily','Vasilev',NULL,NULL,NULL,NULL,NULL,61,'MALE','DATING',NULL,NULL),(55,'Nicolas','Sasev',NULL,NULL,NULL,NULL,NULL,62,'MALE','NOT_SPECIFIED',NULL,NULL),(56,'Ernst','Ernst',NULL,'1988-04-10',NULL,NULL,NULL,63,'MALE','NOT_SPECIFIED',NULL,NULL),(57,'Irina','Petrova',NULL,NULL,'McDonald\'s',NULL,'mashuga.08@mail.ru',64,'FEMALE','MARRIED','McDonald\'s',NULL),(58,'Natalie','Kuznetsova',NULL,NULL,NULL,NULL,NULL,65,'MALE','NOT_SPECIFIED',NULL,NULL),(59,'Yahn','Yahnkovsky',NULL,NULL,'student',NULL,'yahn@mail.by',66,'MALE','SINGLE',NULL,NULL);
+insert  into `contact`(`ID`,`NAME`,`SURNAME`,`FATHERNAME`,`BIRTHDAY`,`JOB`,`PHOTO`,`EMAIL`,`adress_id`,`GENDER`,`FAMILY`,`CITIZENSHIP`,`WEBSITE`) values (49,'Ivan','Ivanov',NULL,'1990-01-12','BSU',NULL,'email1@contacts.com',56,'MALE','MARRIED',NULL,NULL),(50,'Petr','Petrov',NULL,'1990-01-10',NULL,NULL,NULL,57,'MALE','NOT_SPECIFIED',NULL,NULL),(51,'Elena','Sidorova',NULL,NULL,NULL,'avatars/2015-03-1333907869/x_54HmV7Czs.jpg','elena@abc.com',58,'FEMALE','DIVORCED',NULL,NULL),(52,'Pierre','Levacances',NULL,NULL,'IBM',NULL,'pierre@gmail.com',59,'MALE','','french',NULL),(53,'Serge','Levacances',NULL,NULL,'IBM',NULL,'pierre@gmail.com',60,'MALE','','french',NULL),(54,'Vasily','Vasilev',NULL,NULL,NULL,NULL,NULL,61,'MALE','DATING',NULL,NULL),(55,'Nicolai','Sasev',NULL,NULL,NULL,'avatars/2015-03-1332119021/incognito.gif',NULL,62,'MALE','NOT_SPECIFIED',NULL,NULL),(56,'Ernst','Ernst',NULL,'1988-04-10',NULL,'avatars/2015-03-1332683170/8yun5CXGn20.jpg',NULL,63,'MALE','NOT_SPECIFIED',NULL,NULL),(57,'Irina','Petrova',NULL,NULL,'McDonald\'s',NULL,'mashuga.08@mail.ru',64,'FEMALE','MARRIED','McDonald\'s',NULL),(58,'Natalie','Kuznetsova',NULL,NULL,NULL,NULL,NULL,65,'MALE','NOT_SPECIFIED',NULL,NULL),(59,'Yahn','Yahnkovsky',NULL,NULL,'student',NULL,'yahn@mail.by',66,'MALE','SINGLE',NULL,NULL),(60,'Николай','Николаенко',NULL,NULL,NULL,NULL,NULL,67,'MALE','NOT_SPECIFIED',NULL,NULL);
 
 /*Table structure for table `phone` */
 
@@ -96,9 +96,11 @@ CREATE TABLE `phone` (
   KEY `id` (`id`),
   KEY `contact_id` (`contact_id`),
   CONSTRAINT `contact_id` FOREIGN KEY (`contact_id`) REFERENCES `contact` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
 
 /*Data for the table `phone` */
+
+insert  into `phone`(`id`,`number`,`type`,`comment`,`contact_id`,`country`,`operator`) values (1,'345','CELL','Comment',54,'1','2'),(2,'345','HOME','',54,'2',''),(3,'2342','HOME','Comment',54,'12',''),(4,'234','HOME','Comment',54,'1','234');
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;

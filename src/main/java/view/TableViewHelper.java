@@ -46,8 +46,10 @@ public class TableViewHelper extends SimpleTagSupport{
         }
         JspWriter out = getJspContext().getOut();
          String table="";
+        int i = 0;
         for (Contact contact: list) {
-            table = String.format("%s<div class=\"row\"><div class=\"col c5\"><input type=\"checkbox\" name=\"remove\" value = %d></div><div class=\"col c20\"><a href=\"add.jsp?id=%d\">%s</a></div><div class=\"col c20\">%s</div><div class=\"col c20\">%s</div><div class=\"col c20\">%s</div></div>", table, contact.getId(), contact.getId(), contact.getFullName(), contact.getBirthday() == null? "" : contact.getBirthday(), contact.getAddressString(), contact.getJob() == null ? "" : contact.getJob());
+            table = String.format("%s<div class=\"row color%d\"><div class=\"col c5\"><input type=\"checkbox\" name=\"remove\" value = %d></div><div class=\"col c20\"><a href=\"add.jsp?id=%d\">%s</a></div><div class=\"col c20\">%s</div><div class=\"col c20\">%s</div><div class=\"col c20\">%s</div></div>", table, i%2, contact.getId(), contact.getId(), contact.getFullName(), contact.getBirthday() == null? "" : contact.getBirthday(), contact.getAddressString(), contact.getJob() == null ? "" : contact.getJob());
+            ++i;
         }
         table = String.format("<div class = \"table\">%s</div>", table);
            out.println(table);

@@ -1,5 +1,6 @@
 package commandclasses;
 
+import com.mysql.jdbc.StringUtils;
 import dao.DataAccessObject;
 import dataclasses.Contact;
 import org.apache.logging.log4j.Level;
@@ -68,8 +69,8 @@ public class SendEmail extends Command {
         } catch (SQLException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
-        String header = req.getParameter("header");
-        String mailText = req.getParameter("mailText");
+        String header = (String) req.getAttribute("sujet");
+        String mailText = (String) req.getAttribute("arg2");
 
         STGroup group = new STGroupFile("group.stg");
 
@@ -99,6 +100,9 @@ public class SendEmail extends Command {
 
         MimeMessage message = new MimeMessage(session);
         for (Contact contact: contacts) {
+            if (StringUtils.isNullOrEmpty(contact.getEmail())) {
+                continue;
+            }
         try {
 
             message.setFrom(new InternetAddress(sender));

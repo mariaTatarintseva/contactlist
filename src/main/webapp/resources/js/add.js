@@ -61,14 +61,23 @@ function openAttachment() {
 }
 
 function removeSelected() {
-    alert('removeSelected');
+   // alert('removeSelected');
     var elem = document.getElementsByName("newPhone");
     for(var i = 0; i < elem.length; i++)
     {
         if(elem[i].checked) {
-            document.getElementById("content").removeChild(elem[i].parentNode);
+            document.getElementById("table").removeChild(elem[i].parentNode.parentNode);
         }
     }
+    var elem2 = document.getElementsByName("oldPhone");
+    for(var j = 0; j < elem2.length; j++)
+    {
+        if(elem2[j].checked) {
+            document.getElementById("table").removeChild(elem[j].parentNode.parentNode);
+        }
+    }
+
+
 }
 function validate()
 {

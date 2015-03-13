@@ -5,11 +5,13 @@
 <%@ page import="dao.DataAccessObject" %>
 <%@ page language="java" contentType="text/html; charset=utf-8"
     pageEncoding="utf-8"%>
+<%@ page isELIgnored="false"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="stylesheet" type="text/css" href="style.css">
+    <script src="<c:url value="/resources/js/email.js" />"></script>
 <title>Написать письмо</title>
 </head>
 <body>
@@ -19,6 +21,7 @@
     for (int i = 0; i<idsS.length; ++i) {
         ids.add(Integer.valueOf(idsS[i]));
     }
+    pageContext.setAttribute("ids", ids.toArray());
     ArrayList<Contact> contacts = DataAccessObject.getFromDatabase(ids);
     ArrayList<Contact> empty = new ArrayList<Contact>();
     for (Contact contact: contacts) {
@@ -33,34 +36,37 @@
     }
 
     String sendTo = StringUtils.join(mails, ", ");
-    int[] rec = new int[contacts.size()];
-    for (int i = 0; i<rec.length; ++i) {
-        rec[i] = contacts.get(i).getId();
-    }
-    pageContext.setAttribute("mails", rec);
-  //  String[] templates = {"Подпись", "Дата и подпись", "Дата, подпись, контакты"};
-  //  pageContext.setAttribute("templates", templates);
+
+    String[] templates = {"Приветствие и подпись", "Дата и подпись"};
+    pageContext.setAttribute("templates", templates);
 
 %>
+<div id="header">
+    <h1>Написать письмо</h1>
+</div>
+<div id="container">
+
+    <div id="content">
 <form action="FrontController">
     <input type="hidden" name="command" value="SendEmail">
-    <div>
-    <label for="adresses">Получатели: </label> <input type="text" name="adresses" id="adresses" value="<%=sendTo%>">
-    </div>
-    <div>
-    <label for="header">Тема: </label> <input type="text" name="header" id="header">
+    <input type="hidden" name="arg2" value="">
+    <div class="main">
+        <div class="field"><label for="adresses">Получатели: </label> <input type="text" name="adresses" id="adresses" value="<%=sendTo%>"></div>
+        <div class="field"><label for="header">Тема: </label> <input type="text" name="header" id="sujet"></div>
+        <textarea name="mailText" rows="10" cols="70" onkeydown="updateText()" id="message"></textarea>
+        <textarea disabled="disabled" id="view" rows="10" cols="70"></textarea>
     </div>
 
-    <%--<select name="templates" size="<%=templates.length%>">--%>
-        <%--<c:forEach var="template" begin="0" end="<%=templates.length-1%>">--%>
-            <%--<option value="${template}">${templates[template]}</option>--%>
-        <%--</c:forEach>--%>
-    <%--</select>--%>
-    <textarea name="mailText" rows="10" cols="70"></textarea>
-    <c:forEach var="i" items="${mails}">
+    <c:forEach var="i" items="${pageScope.ids}">
+
         <input type="hidden" name="to" value="${i}">
     </c:forEach>
     <input type="submit" value="Отправить">
 </form>
+</div>
+    <div id="footer">
+        iTechArt 2015
+    </div>
+    </div>
 </body>
 </html>

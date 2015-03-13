@@ -18,6 +18,7 @@ function addNewPhone() {
     var comment = document.getElementById("comment").value;
     var type =  document.getElementById("cell").checked ? "CELL" : "HOME";
     var div2 = window.opener.document.createElement('div');
+    var divB = window.opener.document.createElement('div');
     var checkBox = window.opener.document.createElement('input');
     var divN = window.opener.document.createElement('div');
     divN.innerHTML = number;
@@ -30,15 +31,19 @@ function addNewPhone() {
     divC.id = "divC" + id;
     checkBox.type = "checkBox";
     checkBox.name = "newPhone";
-    div2.setAttribute("class", "row");
+    div2.setAttribute("class", "row color"+ (id%2));
     divC.setAttribute("class", "col c20");
     divN.setAttribute("class", "col c20");
     divT.setAttribute("class", "col c20");
-    div2.appendChild(checkBox);
+    divB.setAttribute("class", "col c5");
+
+    divB.appendChild(checkBox);
+    div2.appendChild(divB);
     div2.appendChild(divN);
     div2.appendChild(divT);
     div2.appendChild(divC);
-    window.opener.document.getElementById("content").appendChild(div2);
+    var footer = window.opener.document.getElementById("footer");
+    window.opener.document.getElementById("table").appendChild(div2);
     window.close();
 }
 function validate()

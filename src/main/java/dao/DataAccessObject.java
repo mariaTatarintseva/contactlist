@@ -53,8 +53,13 @@ public class DataAccessObject {
         try {
             Integer address = saveAdress(contact.getAddress(), connection);
             if(contact.getId() != null) {
-                statement = connection.prepareStatement("UPDATE contact SET NAME=?, SURNAME=?, FATHERNAME=?,  JOB=?, EMAIL=?, BIRTHDAY=?, adress_id=?, GENDER=?, FAMILY=?, CITIZENSHIP=? WHERE ID =? ", Statement.RETURN_GENERATED_KEYS);
-                statement.setInt(11, contact.getId());
+                statement = connection.prepareStatement("UPDATE contact SET NAME=?, SURNAME=?, FATHERNAME=?,  JOB=?, EMAIL=?, BIRTHDAY=?, adress_id=?, GENDER=?, FAMILY=?, CITIZENSHIP=?, PHOTO=? WHERE ID =? ", Statement.RETURN_GENERATED_KEYS);
+                statement.setInt(12, contact.getId());
+                if (StringUtils.isNotEmpty(contact.getPhoto()))  {
+                    statement.setString(11, contact.getPhoto());
+                } else {
+                    statement.setNull(11, Types.VARCHAR);
+                }
                 statement.setString(10, contact.getCitizenship());
                 statement.setString(9, contact.getFamilyStatus().name());
                 if (contact.getGender() == Contact.Gender.FEMALE) {
@@ -87,7 +92,6 @@ public class DataAccessObject {
                 //statement = connection.prepareStatement("INSERT INTO adress (COUNTRY, TOWN, STREET, HOME, PLACE, INDEX) VALUES (?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
             } else {
             statement = connection.prepareStatement("INSERT INTO contact (NAME, SURNAME, FATHERNAME,  JOB, EMAIL, BIRTHDAY, adress_id, GENDER, FAMILY, CITIZENSHIP) VALUES (?, ?,?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
-
             statement.setString(1, contact.getName());
             statement.setString(2, contact.getSurname());
                 if (StringUtils.isNotEmpty(contact.getParentName()))  {
@@ -264,6 +268,7 @@ public class DataAccessObject {
                 contact.setFamilyStatus(Contact.FamilyStatus.valueOf(family));
                 }
                 contact.setAddress(getAddressFromDatabase(rs.getInt(12)));
+                contact.setId(id);
             }
 
         } catch (SQLException e) {
@@ -384,7 +389,10 @@ public class DataAccessObject {
                  phoneNumber.setCountry(rs.getString(2));
                  phoneNumber.setOperator(rs.getString(3));
                  phoneNumber.setNumber(rs.getString(4));
-                 //setType
+                 String type = rs.getString(5);
+                 if (!rs.wasNull()) {
+                     phoneNumber.setPhoneType(PhoneNumber.PhoneType.valueOf(type));
+                 }
                  phoneNumber.setComment(rs.getString(6));
                  phoneNumbers.add(phoneNumber);
             }
@@ -599,7 +607,7 @@ public class DataAccessObject {
                 for (PhoneNumber ph : phones)   {
                     statement = connection.prepareStatement("INSERT INTO phone (number, type, comment, contact_id, country, operator) VALUES (?, ?,?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
                     statement.setString(1, ph.getNumber());
-                    statement.setString(2, ph.getPhoneType());
+                    statement.setString(2, ph.getPhoneType().name());
                     statement.setString(3, ph.getComment());
                     statement.setInt(4, id);
                     statement.setString(5, ph.getCountry());
@@ -651,5 +659,28 @@ public class DataAccessObject {
         } finally {
             closeConnection(connection, statement);
         }
+    }
+    public static PhoneNumber getPhone(int id) throws ClassNotFoundException, SQLException {
+        PhoneNumber phoneNumber = new PhoneNumber();
+        Connection connection = connectToDatabase();
+        PreparedStatement statement = null;
+        try {
+            statement = connection.prepareStatement("SELECT country, operator, number, TYPE, COMMENT FROM phone WHERE id =?");
+            statement.setInt(1, id);
+            ResultSet rs = statement.executeQuery();
+            while (rs.next()) {
+                phoneNumber.setCountry(rs.getString(1));
+                phoneNumber.setOperator(rs.getString(2));
+                phoneNumber.setNumber(rs.getString(3));
+                phoneNumber.setPhoneType(PhoneNumber.PhoneType.valueOf(rs.getString(4)));
+                //setType
+                phoneNumber.setComment(rs.getString(5));
+            }
+        } catch (SQLException e) {
+            throw e;
+        } finally {
+            closeConnection(connection, statement);
+        }
+        return phoneNumber;
     }
 }

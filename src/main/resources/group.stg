@@ -1,5 +1,4 @@
 t1(arg1,arg2, arg3) ::= "Здравствуйте, <arg1>!
  <arg2>
 
- С наилучшими пожеланиями,
  <arg3>" // single-line template

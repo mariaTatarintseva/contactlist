@@ -66,7 +66,7 @@ public class SaveContact extends Command {
             operators[i]=StringUtils.substringBetween(newPhones[i], "\t", "\t");
             numbers[i]=StringUtils.substringAfterLast(newPhones[i], "\t");
 
-            phones.add(new PhoneNumber(numbers[i], StringUtils.substringBefore(types[i], "#"), StringUtils.substringBefore(comments[i], "#"), countries[i], operators[i]));
+            phones.add(new PhoneNumber(numbers[i], PhoneNumber.PhoneType.valueOf(StringUtils.substringBefore(types[i], "#")), StringUtils.substringBefore(comments[i], "#"), countries[i], operators[i]));
         }
          }
         Contact contact = null;

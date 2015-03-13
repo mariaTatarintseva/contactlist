@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import javax.servlet.ServletContext;
+import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
@@ -50,5 +51,12 @@ public class Command {
         }
         logger.log(Level.TRACE, String.format("getListFromRequest() returning %s", list.toString()));
         return list;
+    }
+    public static String getResourcesPath(HttpServletRequest req) {
+        File dir = new File(req.getServletContext().getRealPath("/"));
+        System.out.println(dir.getAbsolutePath());
+        dir = dir.getParentFile();
+        dir = dir.getParentFile();
+        return String.format("%s%ssrc%smain%swebapp%sresources%s", dir.getAbsolutePath(),  File.separator, File.separator, File.separator, File.separator, File.separator);
     }
 }

@@ -6,7 +6,7 @@ import org.apache.logging.log4j.Logger;
 public class PhoneNumber {
     private final static Logger logger= LogManager.getLogger(PhoneNumber.class);
 
-    public PhoneNumber(String number, String phoneType, String comment, String country, String operator) {
+    public PhoneNumber(String number, PhoneType phoneType, String comment, String country, String operator) {
         this.number = number;
         this.phoneType = phoneType;
         this.comment = comment;
@@ -14,10 +14,10 @@ public class PhoneNumber {
         this.operator = operator;
     }
 
-    //public enum PhoneType {HOME, CELL};
+    public enum PhoneType {HOME, CELL};
     private Integer id;
     private String number;
-    private String phoneType;
+    private PhoneType phoneType;
     private String comment;
     private String country;
     private String operator;
@@ -58,11 +58,11 @@ public class PhoneNumber {
         this.number = number;
     }
 
-    public String getPhoneType() {
+    public PhoneType getPhoneType() {
         return phoneType;
     }
 
-    public void setPhoneType(String phoneType) {
+    public void setPhoneType(PhoneType phoneType) {
         this.phoneType = phoneType;
     }
 
