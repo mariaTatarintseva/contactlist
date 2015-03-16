@@ -24,16 +24,17 @@
 
     %>
 
-   <form method = "post" action="FrontController" enctype="multipart/form-data">
+
+    <form method = "post" action="FrontController" enctype="multipart/form-data">
                 Select file to upload:
 
                 <input type="file" name="uploadFile" id="uploadFile" accept="image/*"/>
                 <br/><br/>
-                <input type="hidden" name="command" value="FileUpload">
-                <input type="hidden" name="directory" value="avatars">
-                <input type="hidden" name="id" id="id" value="${id}">
-       <input type="submit" value="Сохранить">
-    <%--            <input type="submit" value="Upload">--%>
+                <input type="hidden" name="command" value="FileUpload"/>
+                <input type="hidden" name="directory" value="avatars"/>
+                <input type="hidden" name="id" id="id" value="${id}"/>
+       <input type="submit" value="Сохранить"/>
+    <%--            <input type="submit" value="Upload"/>--%>
             </form>
 </body>
 </html>

@@ -1,4 +1,19 @@
-t1(arg1,arg2, arg3) ::= "Здравствуйте, <arg1>!
- <arg2>
-
- <arg3>" // single-line template
+t0(receiverName, message, senderName, date) ::= "
+ <message>
+" // single-line template
+t1(receiverName, message, senderName, date) ::="Здравствуйте, <receiverName>!
+<message>
+С уважением,
+<senderName>
+"
+t2(receiverName, message, senderName, date) ::="<message>
+С уважением,
+<senderName>
+<date>
+"
+t3(receiverName, message, senderName, date) ::="Здравствуйте, <receiverName>!
+<message>
+С уважением,
+<senderName>
+<date>
+"

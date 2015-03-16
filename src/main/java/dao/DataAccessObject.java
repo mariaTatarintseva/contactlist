@@ -2,6 +2,8 @@ package dao;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.joda.time.LocalDate;
 import dataclasses.Address;
 import dataclasses.Attachment;
@@ -26,8 +28,8 @@ public class DataAccessObject {
         DataAccessObject.DRIVER = DRIVER;
     }
 
-    static String URL;// = "jdbc:mysql://localhost:3306/contacts_tatarintseva";
-    private static String USER;// = "username";
+    static String URL;
+    private static String USER;
 
     public static boolean isInit() {
         return init;
@@ -38,21 +40,19 @@ public class DataAccessObject {
     }
 
     private static boolean init = false;
-    static String PASSWORD;// = "password";
-    static String DRIVER;// = "com.mysql.jdbc.Driver";
+    static String PASSWORD;
+    static String DRIVER;
 
     public static void setUSER(String USER) {
         DataAccessObject.USER = USER;
     }
-
-   // private static String user;
     public static int saveToDatabase (Contact contact) throws SQLException, ClassNotFoundException {
         Connection connection = connectToDatabase();
         connection.setAutoCommit(false);
         PreparedStatement statement = null;
         try {
             Integer address = saveAdress(contact.getAddress(), connection);
-            if(contact.getId() != null) {
+            if(contact.getId() != null && contact.getId() != 0) {
                 statement = connection.prepareStatement("UPDATE contact SET NAME=?, SURNAME=?, FATHERNAME=?,  JOB=?, EMAIL=?, BIRTHDAY=?, adress_id=?, GENDER=?, FAMILY=?, CITIZENSHIP=?, PHOTO=? WHERE ID =? ", Statement.RETURN_GENERATED_KEYS);
                 statement.setInt(12, contact.getId());
                 if (StringUtils.isNotEmpty(contact.getPhoto()))  {
@@ -88,7 +88,7 @@ public class DataAccessObject {
                 } else {
                     statement.setNull(5, Types.VARCHAR);
                 }
-                statement.execute();
+             //   statement.execute();
                 //statement = connection.prepareStatement("INSERT INTO adress (COUNTRY, TOWN, STREET, HOME, PLACE, INDEX) VALUES (?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
             } else {
             statement = connection.prepareStatement("INSERT INTO contact (NAME, SURNAME, FATHERNAME,  JOB, EMAIL, BIRTHDAY, adress_id, GENDER, FAMILY, CITIZENSHIP) VALUES (?, ?,?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
@@ -162,19 +162,27 @@ public class DataAccessObject {
         }
         return res;
     }
-    public static ArrayList<Integer> getAttachmentsOf (Integer id) throws SQLException, ClassNotFoundException {
+    public static ArrayList<Attachment> getAttachmentsOf (Integer id) throws SQLException, ClassNotFoundException {
         Connection connection = connectToDatabase();
         PreparedStatement statement = null;
-        ArrayList<Integer> res = new ArrayList<Integer>();
+        ArrayList<Attachment> res = new ArrayList<Attachment>();
         if (id == null) {
             return res;
         }
         try {
-            statement = connection.prepareStatement("SELECT ID FROM attachment WHERE CONTACT_ID=?");
+            statement = connection.prepareStatement("SELECT ID, NAME, DATE, COMMENT, PATH FROM attachment WHERE CONTACT_ID=?");
             statement.setInt(1, id);
             ResultSet rs = statement.executeQuery();
             while (rs.next()) {
-                res.add(rs.getInt(1));
+                Attachment attachment = new Attachment();
+                attachment.setId(rs.getInt(1));
+                attachment.setName(rs.getString(2));
+                //if (rs.getDate(3) != null) {
+                  //  attachment.setDate(DateTime.parse(rs.getTimestamp(3).toString()));
+               // }
+                attachment.setComment(rs.getString(4));
+                attachment.setPath(rs.getString(5));
+                res.add(attachment);
             }
         } catch (SQLException e) {
             throw e;
@@ -323,12 +331,14 @@ public class DataAccessObject {
     }
     public static void deleteFromDatabase (ArrayList<Integer> ids) throws SQLException, ClassNotFoundException {
         Connection connection = connectToDatabase();
+        connection.setAutoCommit(false);
         PreparedStatement statement = null;
         try {
             String remove = StringUtils.join(ids, "', '");
             remove = StringUtils.substring(remove, 0, remove.length());
             statement = connection.prepareStatement(String.format("DELETE FROM contact WHERE ID IN %s", String.format("('%s')", remove)));
             statement.executeUpdate();
+            connection.commit();
         }
         catch (SQLException e) {
             throw e;
@@ -386,9 +396,18 @@ public class DataAccessObject {
              while (rs.next()) {
                    PhoneNumber phoneNumber = new PhoneNumber();
                  phoneNumber.setId(rs.getInt(1));
-                 phoneNumber.setCountry(rs.getString(2));
-                 phoneNumber.setOperator(rs.getString(3));
-                 phoneNumber.setNumber(rs.getString(4));
+                 phoneNumber.setCountry(rs.getInt(2));
+                 if (rs.wasNull()) {
+                     phoneNumber.setCountry(null);
+                 }
+                 phoneNumber.setOperator(rs.getInt(3));
+                 if (rs.wasNull()) {
+                     phoneNumber.setOperator(null);
+                 }
+                 phoneNumber.setNumber(rs.getInt(4));
+                 if (rs.wasNull()) {
+                     phoneNumber.setNumber(null);
+                 }
                  String type = rs.getString(5);
                  if (!rs.wasNull()) {
                      phoneNumber.setPhoneType(PhoneNumber.PhoneType.valueOf(type));
@@ -403,6 +422,31 @@ public class DataAccessObject {
         }
         return phoneNumbers;
     }
+
+    public static ArrayList<Attachment> getAttachments(int contactId) throws ClassNotFoundException, SQLException {
+        ArrayList<Attachment> attachmentss = new ArrayList<Attachment>();
+        Connection connection = connectToDatabase();
+        PreparedStatement statement = null;
+        try {
+            statement = connection.prepareStatement("SELECT  id, NAME, DATE, COMMENT FROM attachment WHERE contact_id =?");
+            statement.setInt(1, contactId);
+            ResultSet rs = statement.executeQuery();
+            while (rs.next()) {
+                Attachment attachment = new Attachment();
+                attachment.setId(rs.getInt(1));
+                attachment.setName(rs.getString(2));
+             //   attachment.getDate();
+                attachment.setComment(rs.getString(4));
+                attachmentss.add(attachment);
+            }
+        } catch (SQLException e) {
+            throw e;
+        } finally {
+            closeConnection(connection, statement);
+        }
+        return attachmentss;
+    }
+
     private static Integer saveAdress(Address address, Connection connection) throws ClassNotFoundException, SQLException {
       //  Connection connection = connectToDatabase();
 
@@ -466,12 +510,14 @@ public class DataAccessObject {
         public static void setPhoto (String photo, int id) throws ClassNotFoundException, SQLException {
             //delete file
             Connection connection = connectToDatabase();
+            connection.setAutoCommit(false);
             PreparedStatement statement = null;
             try {
                 statement = connection.prepareStatement("UPDATE contact SET PHOTO=? WHERE ID =? ");
                  statement.setString(1, photo);
                 statement.setInt(2, id);
                 statement.executeUpdate();
+                connection.commit();
             } catch (SQLException e) {
 
 
@@ -538,66 +584,26 @@ public class DataAccessObject {
         closeConnection(connection, statement);
         return contacts;
     }
-    public static void setPhoto (Integer id, String photo) throws ClassNotFoundException, SQLException {
-        Connection connection;
-        connection = connectToDatabase();
-        PreparedStatement statement = null;
-        try {
-                statement = connection.prepareStatement("UPDATE contact SET PHOTO=? WHERE ID =? ");
-                statement.setInt(2, id);
-                statement.setString(1, photo);
-        } catch (SQLException e) {
-            throw e;
-        }     finally {
-            closeConnection(connection, statement);
-        }
-
-    }
-    public static void saveAttachement() {
-
-    }
-        /*   public static int saveToDatabase (Attachment attachment, int contact) {
-          Connection connection = connectToDatabase();
-          PreparedStatement statement = null;
-          try {
-
-              if(contact.getId() != 0) {
-                  statement = connection.prepareStatement("UPDATE contact SET NAME=?, SURNAME=?, FATHERNAME=?,  JOB=?, EMAIL=?, BIRTHDAY=? WHERE ID =? ");
-                  statement.setInt(7, contact.getId());
-                  statement.setDate(6, contact.getBirthday() == null? null : java.sql.Date.valueOf(contact.getBirthday().toString()));
-                  statement.setString(1, contact.getName());
-                  statement.setString(2, contact.getSurname());
-                  statement.setString(3, contact.getParentName());
-                  statement.setString(4, contact.getJob());
-                  statement.setString(5, contact.getEmail());
-                  statement.execute();
-                  statement = connection.prepareStatement("INSERT INTO adress (COUNTRY, TOWN, STREET, HOME, PLACE, INDEX) VALUES (?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
-              } else {
-                  statement = connection.prepareStatement("INSERT INTO contact (NAME, SURNAME, FATHERNAME,  JOB, EMAIL, BIRTHDAY) VALUES (?, ?,?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
-
-                  statement.setString(1, contact.getName());
-                  statement.setString(2, contact.getSurname());
-                  statement.setString(3, contact.getParentName());
-                  statement.setString(4, contact.getJob());
-                  statement.setString(5, contact.getEmail());
-                  statement.setDate(6, contact.getBirthday() == null? null : java.sql.Date.valueOf(contact.getBirthday().toString()));
-                  statement.execute();
-
-                  ResultSet rs = statement.getGeneratedKeys();
-                  if (rs.next()) {
-                      contact.setId(rs.getInt("ID"));
-                  }
-              }
-              contact.setId(saveAdress(contact.getAddress()));
-
-          } catch (SQLException e) {
-              throw e;
-          }   finally {
-
-              closeConnection(connection, statement);
-          }
-          return contact.getId();
-      }  */
+//    public static void setPhoto (Integer id, String photo) throws ClassNotFoundException, SQLException {
+//        Connection connection;
+//        connection = connectToDatabase();
+//        connection.setAutoCommit(false);
+//        PreparedStatement statement = null;
+//        try {
+//                statement = connection.prepareStatement("UPDATE contact SET PHOTO=? WHERE ID =? ");
+//                statement.setInt(2, id);
+//                statement.setString(1, photo);
+//
+//        } catch (SQLException e) {
+//            throw e;
+//        }     finally {
+//            closeConnection(connection, statement);
+//        }
+//
+//    }
+//    public static void saveAttachement() {
+//
+//    }
 
         public static void addPhones (Integer id, ArrayList<PhoneNumber> phones) throws ClassNotFoundException, SQLException {
             Connection connection = connectToDatabase();
@@ -606,12 +612,27 @@ public class DataAccessObject {
             try {
                 for (PhoneNumber ph : phones)   {
                     statement = connection.prepareStatement("INSERT INTO phone (number, type, comment, contact_id, country, operator) VALUES (?, ?,?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
-                    statement.setString(1, ph.getNumber());
+                    Integer number = ph.getNumber();
+                    Integer country = ph.getCountry();
+                    Integer operator = ph.getOperator();
+                    if (number != null) {
+                    statement.setInt(1, number);
+                    } else {
+                        statement.setNull(1, Types.INTEGER);
+                    }
                     statement.setString(2, ph.getPhoneType().name());
                     statement.setString(3, ph.getComment());
                     statement.setInt(4, id);
-                    statement.setString(5, ph.getCountry());
-                    statement.setString(6, ph.getOperator());
+                    if (country != null) {
+                        statement.setInt(5, country);
+                    } else {
+                        statement.setNull(5, Types.INTEGER);
+                    }
+                    if (operator != null) {
+                        statement.setInt(6, operator);
+                    } else {
+                        statement.setNull(6, Types.INTEGER);
+                    }
                     statement.execute();
                 }
                connection.commit();
@@ -623,8 +644,55 @@ public class DataAccessObject {
                 closeConnection(connection, statement);
             }
         }
+    public static void addAttachments (Integer id, ArrayList<Attachment> attachments) throws ClassNotFoundException, SQLException {
+        Connection connection = connectToDatabase();
+        connection.setAutoCommit(false);
+        PreparedStatement statement = null;
+        try {
+            for (Attachment att: attachments)   {
+                statement = connection.prepareStatement("INSERT INTO attachment (NAME, DATE, COMMENT, CONTACT_ID, PATH) VALUES (?, ?,?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+                String name = att.getName();
+                DateTime date = att.getDate();
+                String comment = att.getComment();
+                String path = att.getPath();
+                if (StringUtils.isNotEmpty(name)) {
+                    statement.setString(1, name);
+                } else {
+                    statement.setNull(1, Types.VARCHAR);
+                }
+                if (date != null) {
+                    statement.setTimestamp(2, new Timestamp(date.getMillis()));
+                } else {
+                    statement.setNull(2, Types.TIMESTAMP);
+                }
+                if (StringUtils.isNotEmpty(comment)) {
+                    statement.setString(3, comment);
+                } else {
+                    statement.setNull(3, Types.VARCHAR);
+                }
+                statement.setInt(4, id);
+                if (StringUtils.isNotEmpty(path)) {
+                    statement.setString(5, path);
+                } else {
+                    statement.setNull(5, Types.VARCHAR);
+                }
+
+
+
+                statement.execute();
+            }
+            connection.commit();
+
+        } catch (SQLException e) {
+            throw e;
+        }   finally {
+
+            closeConnection(connection, statement);
+        }
+    }
     public static void addAttachment (Attachment attachment) throws SQLException, ClassNotFoundException {
         Connection connection = connectToDatabase();
+        connection.setAutoCommit(false);
         PreparedStatement statement = null;
         try {
                 statement = connection.prepareStatement("INSERT INTO attachment (NAME, DATE, COMMENT, CONTACT_ID, PATH) VALUES (?, ?,?, ?, ?)");
@@ -634,6 +702,7 @@ public class DataAccessObject {
                 statement.setInt(4, attachment.getContactId());
                 statement.setString(5, attachment.getPath());
                 statement.execute();
+            connection.commit();
         } catch (SQLException e) {
             throw e;
         }   finally {
@@ -642,10 +711,8 @@ public class DataAccessObject {
         }
     }
     public static void removeNumbersExcept (int id, ArrayList<Integer> ids) throws ClassNotFoundException, SQLException {
-        if (ids.isEmpty()) {
-            return;
-        }
         Connection connection = connectToDatabase();
+        connection.setAutoCommit(false);
         PreparedStatement statement = null;
         try {
             String remove = StringUtils.join(ids, "', '");
@@ -653,6 +720,7 @@ public class DataAccessObject {
             statement = connection.prepareStatement(String.format("DELETE FROM phone WHERE contact_id=? AND ID NOT IN %s", String.format("('%s')", remove)));
             statement.setInt(1, id);
             statement.execute();
+            connection.commit();
         }
         catch (SQLException e) {
             throw e;
@@ -660,6 +728,26 @@ public class DataAccessObject {
             closeConnection(connection, statement);
         }
     }
+
+    public static void removeAttachmentsExcept (int id, ArrayList<Integer> ids) throws ClassNotFoundException, SQLException {
+        Connection connection = connectToDatabase();
+        connection.setAutoCommit(false);
+        PreparedStatement statement = null;
+        try {
+            String remove = StringUtils.join(ids, "', '");
+            remove = StringUtils.substring(remove, 0, remove.length());
+            statement = connection.prepareStatement(String.format("DELETE FROM attachment WHERE CONTACT_ID=? AND ID NOT IN %s", String.format("('%s')", remove)));
+            statement.setInt(1, id);
+            statement.execute();
+            connection.commit();
+        }
+        catch (SQLException e) {
+            throw e;
+        } finally {
+            closeConnection(connection, statement);
+        }
+    }
+
     public static PhoneNumber getPhone(int id) throws ClassNotFoundException, SQLException {
         PhoneNumber phoneNumber = new PhoneNumber();
         Connection connection = connectToDatabase();
@@ -669,9 +757,18 @@ public class DataAccessObject {
             statement.setInt(1, id);
             ResultSet rs = statement.executeQuery();
             while (rs.next()) {
-                phoneNumber.setCountry(rs.getString(1));
-                phoneNumber.setOperator(rs.getString(2));
-                phoneNumber.setNumber(rs.getString(3));
+                phoneNumber.setCountry(rs.getInt(1));
+                if (rs.wasNull()) {
+                    phoneNumber.setCountry(null);
+                }
+                phoneNumber.setOperator(rs.getInt(2));
+                if (rs.wasNull()) {
+                    phoneNumber.setOperator(null);
+                }
+                phoneNumber.setNumber(rs.getInt(3));
+                if (rs.wasNull()) {
+                    phoneNumber.setNumber(null);
+                }
                 phoneNumber.setPhoneType(PhoneNumber.PhoneType.valueOf(rs.getString(4)));
                 //setType
                 phoneNumber.setComment(rs.getString(5));
@@ -682,5 +779,33 @@ public class DataAccessObject {
             closeConnection(connection, statement);
         }
         return phoneNumber;
+    }
+    public static ArrayList<Contact> getContactsWithBirthday () throws ClassNotFoundException, SQLException {
+        ArrayList<Contact> ret = new ArrayList<Contact>();
+        LocalDate today = LocalDate.now();
+        Connection connection = connectToDatabase();
+        PreparedStatement statement = null;
+        try {
+            statement = connection.prepareStatement("SELECT ID, NAME, SURNAME, FATHERNAME, EMAIL FROM contact WHERE MONTH(BIRTHDAY) = ? AND DAY(BIRTHDAY) = ?");
+            statement.setInt(2, today.getDayOfMonth());
+            statement.setInt(1, today.getMonthOfYear());
+            ResultSet rs = statement.executeQuery();
+            while (rs.next()) {
+                Contact contact = new Contact();
+                contact.setId(rs.getInt(1));
+                contact.setName(rs.getString(2));
+                contact.setParentName(rs.getString(4));
+                contact.setSurname(rs.getString(3));
+                contact.setEmail(rs.getString(5));
+
+                ret.add(contact);
+            }
+        } catch (SQLException e) {
+            throw e;
+        }   finally {
+            closeConnection(connection, statement);
+        }
+
+        return ret;
     }
 }

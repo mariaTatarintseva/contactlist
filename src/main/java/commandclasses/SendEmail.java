@@ -3,9 +3,11 @@ package commandclasses;
 import com.mysql.jdbc.StringUtils;
 import dao.DataAccessObject;
 import dataclasses.Contact;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.joda.time.LocalDate;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
@@ -16,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Properties;
 
 /**
@@ -27,9 +30,10 @@ import java.util.Properties;
  */
 public class SendEmail extends Command {
     private final static Logger logger= LogManager.getLogger(SendEmail.class);
+    private static String[][] args = {{}, {}, {}, {}};
     @Override
     public void process() {
-        logger.log(Level.DEBUG, "process()");
+        super.process();
         String sender = null;
         String senderName = null;
         String password = null;
@@ -40,12 +44,12 @@ public class SendEmail extends Command {
              sender = properties.getProperty("userEmail");
              password = properties.getProperty("userEmailPassword");
              senderName= properties.getProperty("userShowName");
-         } catch (IOException e) {
-             logger.log(Level.ERROR, e.getMessage());
+         } catch (Exception e) {
+             logger.log(Level.ERROR, ExceptionUtils.getStackTrace(e));
              try {
                  res.sendRedirect("error.jsp");
              } catch (IOException e1) {
-                 logger.log(Level.ERROR, e1.getMessage());
+                 logger.log(Level.ERROR, ExceptionUtils.getStackTrace(e1));
              }
              return;
          }
@@ -64,21 +68,25 @@ public class SendEmail extends Command {
         ArrayList<Contact> contacts = null;
         try {
              contacts = DataAccessObject.getFromDatabase(rec);
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        } catch (SQLException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        } catch (Exception e) {
+            logger.log(Level.ERROR, ExceptionUtils.getStackTrace(e));
+            try {
+                res.sendRedirect("error.jsp");
+            } catch (IOException e1) {
+                logger.log(Level.ERROR, ExceptionUtils.getStackTrace(e1));
+            }
         }
-        String header = (String) req.getAttribute("sujet");
-        String mailText = (String) req.getAttribute("arg2");
+
+        String header = req.getParameterValues("sujet")[0];
+        String mailText = req.getParameter("mailTxt");
 
         STGroup group = new STGroupFile("group.stg");
 
-        ST text = group.getInstanceOf("t1");
+        ST text = group.getInstanceOf(String.format("t%s",req.getParameterValues("templates")[0]));
         //text.add("arg1", "This is template 1");
-        text.add("arg2", mailText);
-        text.add("arg3", senderName);
-        System.out.println(text.render());
+        text.add("message", mailText);
+        text.add("senderName", senderName);
+        text.add("date", LocalDate.now().toString());
 
 
 
@@ -108,25 +116,32 @@ public class SendEmail extends Command {
             message.setFrom(new InternetAddress(sender));
             message.addRecipient(Message.RecipientType.TO, new InternetAddress(contact.getEmail()));
             message.setSubject(header);
-            text.add("arg1", contact.getName());
+            text.add("receiverName", contact.getName());
             message.setText(text.render());
-
+            System.out.println(text.render());
+            text.remove("receiverName");
             Transport.send(message);
         } catch (MessagingException e) {
+            logger.log(Level.ERROR, ExceptionUtils.getStackTrace(e));
             try {
                 res.sendRedirect("error.jsp");
-                return;
             } catch (IOException e1) {
-                logger.log(Level.ERROR, e1.getStackTrace());
+                logger.log(Level.ERROR, ExceptionUtils.getStackTrace(e1));
             }
         }
 
         }
-        System.out.print(req.getParameter("mailText"));
+        System.out.print(req.getParameter("mailTxt"));
         try {
             res.sendRedirect("mailsent.jsp");
             return;
         } catch (IOException e) {
+            logger.log(Level.ERROR, ExceptionUtils.getStackTrace(e));
+            try {
+                res.sendRedirect("error.jsp");
+            } catch (IOException e1) {
+                logger.log(Level.ERROR, ExceptionUtils.getStackTrace(e1));
+            }
         }
         try {
             res.sendRedirect("error.jsp");
@@ -135,5 +150,4 @@ public class SendEmail extends Command {
             logger.log(Level.ERROR, e.getStackTrace());
         }
     }
-
 }

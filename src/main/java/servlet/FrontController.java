@@ -1,16 +1,26 @@
 package servlet;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import commandclasses.Command;
 import dao.DataAccessObject;
+import org.quartz.JobDetail;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.SimpleTrigger;
+import org.quartz.impl.StdSchedulerFactory;
+import scheduler.BirthdayJob;
+import scheduler.BirthdayTrigger;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Date;
 import java.util.Properties;
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -26,7 +36,7 @@ public class FrontController extends HttpServlet {
         try {
             req.setCharacterEncoding("UTF-8");
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            logger.log(Level.ERROR, ExceptionUtils.getStackTrace(e));
         }
         logger.log(Level.DEBUG, "processRequest()");
         String className;
@@ -40,7 +50,7 @@ public class FrontController extends HttpServlet {
             try {
                 resp.sendRedirect("error.jsp");
             } catch (IOException e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                logger.log(Level.ERROR, ExceptionUtils.getStackTrace(e));
             }
 
             }
@@ -53,16 +63,8 @@ public class FrontController extends HttpServlet {
             Command command = (Command)Class.forName(className).getConstructor().newInstance();
             command.init(getServletContext(), req, resp);
             command.process();
-        } catch (InstantiationException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        } catch (Exception e) {
+            logger.log(Level.ERROR, ExceptionUtils.getStackTrace(e));
         }
 
 
@@ -76,7 +78,46 @@ public class FrontController extends HttpServlet {
 
     }
 
-	/**
+    @Override
+    public void init(ServletConfig config) throws ServletException {
+        super.init(config);    //To change body of overridden methods use File | Settings | File Templates.
+        JobDetail job = new JobDetail();
+        job.setName("birthdayJobName");
+        job.setJobClass(BirthdayJob.class);
+
+        BirthdayTrigger trigger = new BirthdayTrigger();
+        trigger.setStartTime(new Date(System.currentTimeMillis() + 24L*60L*60L*1000L));
+        trigger.setRepeatCount(SimpleTrigger.REPEAT_INDEFINITELY);
+        trigger.setRepeatInterval(24L*60L*60L*1000L);     //24L * 60L *
+        trigger.setName("birthdayTrigger");
+
+        Properties properties = new Properties();
+        InputStream inputStream = getServletContext().getResourceAsStream("/WEB-INF/properties/contactlist.properties");
+        try {
+            properties.load(inputStream);
+            trigger.setSender(properties.getProperty("reminderEmail"));
+            trigger.setSenderPassword(properties.getProperty("reminderEmailPassword"));
+            trigger.setUser(properties.getProperty("userEmail"));
+            trigger.setUserPassword(properties.getProperty("userEmailPassword"));
+            trigger.setUserShowName(properties.getProperty("userShowName"));
+            trigger.setReminderPattern(properties.getProperty("reminderPattern"));
+        } catch (IOException e) {
+            logger.log(Level.ERROR, ExceptionUtils.getStackTrace(e));
+        }
+
+
+        Scheduler scheduler = null;
+        try {
+            scheduler = new StdSchedulerFactory().getScheduler();
+            scheduler.start();
+            scheduler.scheduleJob(job, trigger);
+        } catch (SchedulerException e) {
+            logger.log(Level.ERROR, ExceptionUtils.getRootCauseMessage(e));
+        }
+
+    }
+
+    /**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

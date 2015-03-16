@@ -20,7 +20,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class PhonesTableViewHelper extends SimpleTagSupport{
-    private final static Logger logger= LogManager.getLogger(PhonesTableViewHelper.class);
+    private final static Logger logger= LogManager.getLogger(AttachmentsViewHelper.class);
 
     public void setId(int id) {
         this.id = id;
@@ -30,10 +30,10 @@ public class PhonesTableViewHelper extends SimpleTagSupport{
 
     public void doTag() throws JspException, IOException
     {
-        if (id == 0) {
-            return;
-        }
         ArrayList<PhoneNumber> list = null;
+        if (id == 0) {
+            list = new ArrayList<>();
+        }  else {
         try {
             list = DataAccessObject.getPhones(id);
         } catch (ClassNotFoundException e) {
@@ -43,18 +43,15 @@ public class PhonesTableViewHelper extends SimpleTagSupport{
             logger.log(Level.ERROR, e.getStackTrace());
             return;
         }
+        }
         JspWriter out = getJspContext().getOut();
         String table="";
-        String oldN, oldT, oldC;
         int i = 0;
         for (PhoneNumber phoneNumber: list) {
-            oldN = String.format("oldN%d", phoneNumber.getId());
-            oldT = String.format("oldT%d", phoneNumber.getId());
-            oldC = String.format("oldC%d", phoneNumber.getId());
-            table = String.format("%s<div class=\"row color%d\"><div class=\"col c5\"><input type=\"checkbox\" name=\"oldPhone\" value = %d></div><div class=\"col c20\" id=\"%s\"><a href=\"phone.jsp?id=%d\">%s</a></div><div class=\"col c20\" id=\"%s\">%s</div><div class=\"col c20\" id=\"%s\">%s</div></div>", table, i%2, phoneNumber.getId(), oldN, phoneNumber.getId(), phoneNumber.toString(),oldT, phoneNumber.getPhoneType(), oldC, phoneNumber.getComment());
+            table = String.format("%s<div class=\"row color%d\" id=\"phoneOld%d\" name=\"phoneOld\"><div class=\"col c5\"><input type=\"checkbox\" name=\"oldPhone\" value = %d/></div><div class=\"col c20\"><button type=\"button\" class=\"ref\" onclick=\"editPhone(this)\">%s</button></div><div class=\"col c20\">%s</div><div class=\"col c20\">%s</div></div>", table,  i%2, phoneNumber.getId(), phoneNumber.getId(), phoneNumber.toString(),  phoneNumber.getPhoneType(), phoneNumber.getComment());
             ++i;
         }
-        table = String.format("<div class = \"table\" id=\"table\">%s</div>", table);
+        table = String.format("<div class = \"table\" id=\"tablePhones\">%s</div>", table);
         out.println(table);
     }
 }

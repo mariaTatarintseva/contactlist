@@ -1,5 +1,6 @@
 package commandclasses;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -17,11 +18,10 @@ public class Error extends Command {
     private final static Logger logger= LogManager.getLogger(Error.class);
     @Override public void process () {
         logger.log(Level.DEBUG, "process()");
-        //log the mistake
         try {
             res.sendRedirect("error.jsp");
         } catch (IOException e) {
-            logger.log(Level.ERROR, e.getStackTrace());
+            logger.log(Level.ERROR, ExceptionUtils.getStackTrace(e));
         }
     }
 }

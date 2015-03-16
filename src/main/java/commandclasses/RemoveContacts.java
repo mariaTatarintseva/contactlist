@@ -1,5 +1,6 @@
 package commandclasses;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -20,33 +21,33 @@ public class RemoveContacts extends Command {
     private final static Logger logger= LogManager.getLogger(RemoveContacts.class);
     @Override
     public void process() {
-        logger.log(Level.DEBUG, "process()");
+        super.process();
         ArrayList<Integer> toRemove = getListFromRequest();
         try {
             DataAccessObject.deleteFromDatabase(toRemove);
         } catch (SQLException e) {
-            logger.log(Level.ERROR, e.getStackTrace());
+            logger.log(Level.ERROR, ExceptionUtils.getStackTrace(e));
             try {
-                res.sendRedirect("error.jsp");
+                res.sendRedirect("error.jsp?msg=0");
             } catch (IOException e1) {
-                logger.log(Level.ERROR, e1.getStackTrace());
+                logger.log(Level.ERROR, ExceptionUtils.getStackTrace(e1));
             }
-        } catch (ClassNotFoundException e) {
-            logger.log(Level.ERROR, e.getStackTrace());
+        } catch (Exception e) {
+            logger.log(Level.ERROR, ExceptionUtils.getStackTrace(e));
             try {
                 res.sendRedirect("error.jsp");
             } catch (IOException e1) {
-                logger.log(Level.ERROR, e1.getStackTrace());
+                logger.log(Level.ERROR, ExceptionUtils.getStackTrace(e1));
             }
         }
         try {
             res.sendRedirect("index.jsp");
         } catch (IOException e) {
-            logger.log(Level.ERROR, e.getStackTrace());
+            logger.log(Level.ERROR, ExceptionUtils.getStackTrace(e));
             try {
                 res.sendRedirect("error.jsp");
             } catch (IOException e1) {
-                logger.log(Level.ERROR, e1.getStackTrace());
+                logger.log(Level.ERROR, ExceptionUtils.getStackTrace(e1));
             }
         }
     }

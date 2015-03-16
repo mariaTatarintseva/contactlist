@@ -6,12 +6,16 @@
  * To change this template use File | Settings | File Templates.
  */
 
-function initializePages() {
-    //       alert('initializePages')
-    if (sessionStorage.getItem("page") == null) {
-    sessionStorage.setItem("page", 0);
-    sessionStorage.setItem("onPage", 10);
-    }
+//function initializePages() {
+//    //       alert('initializePages')
+//    if (sessionStorage.getItem("page") == null) {
+//    sessionStorage.setItem("page", 0);
+//    sessionStorage.setItem("onPage", 10);
+//    }
+//}
+function selectThePage() {
+    document.getElementById("onPage").value = document.getElementById("selectPage").value;
+    document.forms.namedItem("pageForm").submit();
 }
     function removeSelected() {
         document.getElementById('com').value = 'RemoveContacts';

@@ -1,5 +1,6 @@
 package commandclasses;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -17,16 +18,16 @@ public class OpenPage extends Command {
     private final static Logger logger= LogManager.getLogger(OpenPage.class);
     @Override
     public void process() {
-        logger.log(Level.DEBUG, "process()");
+        super.process();
         System.out.print("OpenPage process()");
         try {
             res.sendRedirect(String.format("index.jsp?pageNumber=%s&onPage=%s", req.getParameter("page") ,req.getParameter("onPage")));
-        } catch (IOException e) {
-            logger.log(Level.ERROR, e.getStackTrace());
+        } catch (Exception e) {
+            logger.log(Level.ERROR, ExceptionUtils.getStackTrace(e));
             try {
                 res.sendRedirect("error.jsp");
             } catch (IOException e1) {
-                logger.log(Level.ERROR, e1.getStackTrace());
+                logger.log(Level.ERROR, ExceptionUtils.getStackTrace(e1));
             }
         }
     }

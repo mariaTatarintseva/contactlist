@@ -12,6 +12,7 @@ public class Contact implements Serializable, Comparable<Contact>{
     private final static Logger logger= LogManager.getLogger(Contact.class);
     public Contact() {
         this.phoneNumbers = new ArrayList<PhoneNumber>();
+        this.attachments = new ArrayList<Attachment>();
     }
 	private static final long serialVersionUID = -5962530188216852276L;
 
@@ -126,10 +127,8 @@ public class Contact implements Serializable, Comparable<Contact>{
     }
 
     public enum FamilyStatus {NOT_SPECIFIED, DIVORCED, DATING, MARRIED, SINGLE, WIDOW};
-
 	private Integer id;
 	private String name;
-
     public String getSurname() {
         return surname;
     }
@@ -181,5 +180,15 @@ public class Contact implements Serializable, Comparable<Contact>{
     }
 
     private ArrayList<PhoneNumber> phoneNumbers;
+
+    public ArrayList<Attachment> getAttachments() {
+        return attachments;
+    }
+
+    public void setAttachments(ArrayList<Attachment> attachments) {
+        this.attachments = attachments;
+    }
+
+    private ArrayList<Attachment> attachments;
 	private String photo;
 }

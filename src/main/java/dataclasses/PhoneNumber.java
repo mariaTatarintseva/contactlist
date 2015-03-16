@@ -6,7 +6,7 @@ import org.apache.logging.log4j.Logger;
 public class PhoneNumber {
     private final static Logger logger= LogManager.getLogger(PhoneNumber.class);
 
-    public PhoneNumber(String number, PhoneType phoneType, String comment, String country, String operator) {
+    public PhoneNumber(Integer number, PhoneType phoneType, String comment, Integer country, Integer operator) {
         this.number = number;
         this.phoneType = phoneType;
         this.comment = comment;
@@ -16,11 +16,11 @@ public class PhoneNumber {
 
     public enum PhoneType {HOME, CELL};
     private Integer id;
-    private String number;
+    private Integer number;
     private PhoneType phoneType;
     private String comment;
-    private String country;
-    private String operator;
+    private Integer country;
+    private Integer operator;
 
     public Integer getId() {
         return id;
@@ -30,31 +30,34 @@ public class PhoneNumber {
         this.id = id;
     }
 
-    public String getCountry() {
+    public Integer getCountry() {
         return country;
     }
 
-    public void setCountry(String country) {
+    public void setCountry(Integer country) {
         this.country = country;
     }
 
-    public String getOperator() {
+    public Integer getOperator() {
         return operator;
     }
 
-    public void setOperator(String operator) {
+    public void setOperator(Integer operator) {
         this.operator = operator;
     }
 
     public String toString() {
-        return String.format("%s\t%s\t%s", country, operator, number);
+        String c = (country == null? "" : String.valueOf(country));
+        String o = (operator == null? "" : String.valueOf(operator));
+        String n = (number == null? "" : String.valueOf(number));
+        return String.format("%s\t%s\t%s", c, o, n);
     }
 
-    public String getNumber() {
+    public Integer getNumber() {
         return number;
     }
 
-    public void setNumber(String number) {
+    public void setNumber(Integer number) {
         this.number = number;
     }
 

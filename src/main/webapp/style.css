@@ -17,6 +17,14 @@ label {float:left; padding-right:10px;}
     padding:5px;
     height: 20%;
 }
+.h2 {
+    background-color:#777777;
+    color:white;
+    text-align:center;
+    padding:5px;
+    height: 10%;
+    width: 100%;
+}
 #nav {
     line-height:30px;
     background-color:#eeeeee;
@@ -31,11 +39,12 @@ label {float:left; padding-right:10px;}
     height: 100%;
 }
 #content {
-    width:70%;
-    float:left;
+    width:100%;
+    float:right;
     /*padding:10px;*/
     min-height: 100%;
     background-color: #E8E8DE;
+    display: block;
 }
 #footer {
     background-color:#777777;
@@ -47,10 +56,10 @@ label {float:left; padding-right:10px;}
 }
 .ref {
     width: 100%;
-    background-color:#eeeeee;
+    /*background-color:#eeeeee;*/
     color:black;
     border: 1px;
-    border-color: #dddddd;
+    border-color: #333333;
 }
 .row
 {
@@ -97,8 +106,52 @@ label {float:left; padding-right:10px;}
 .color0{
     background-color: #cccccc;
 }
-
-
+#uploadAtt {
+    width:30%;
+    height:30%;
+    top:20%;
+    left:20%;
+    display:none;
+    position:fixed;
+    background-color: #cbcbcb;
+    border: solid 1px #aaaaaa;
+    padding: 5%;
+}
+#addPhone {
+    width:30%;
+    height:30%;
+    top:20%;
+    left:20%;
+    display:none;
+    position:fixed;
+    background-color: #cbcbcb;
+    border: solid 1px #aaaaaa;
+    padding: 5%;
+    /*overflow:auto*/
+}
+#addAtt {
+    width:30%;
+    height:30%;
+    top:20%;
+    left:20%;
+    display:none;
+    position:fixed;
+    background-color: #cbcbcb;
+    border: solid 1px #aaaaaa;
+    padding-top: 5%;
+    padding: 5%;
+    /*overflow:auto*/
+}
+.btnClass {
+    background-color: #cbcbcb;
+    border: solid 1px #aaaaaa;
+    width: 100%;
+    /*float: right;*/
+}
+.rightFlow {
+   float: right;
+    width: 30%;
+}
 /*html, body {*/
     /*height: 100%;*/
 /*}*/

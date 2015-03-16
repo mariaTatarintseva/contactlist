@@ -1,6 +1,7 @@
 package commandclasses;
 
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -10,8 +11,11 @@ import javax.servlet.http.HttpServletResponse;
 
 import javax.servlet.ServletContext;
 import java.io.File;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA.
@@ -21,11 +25,11 @@ import java.util.ArrayList;
  * To change this template use File | Settings | File Templates.
  */
 public class Command {
-    private final static Logger logger= LogManager.getLogger(Command.class);
     protected ServletContext context;
     protected HttpServletRequest req;
     protected HttpServletResponse res;
     public void init (ServletContext context, HttpServletRequest req, HttpServletResponse res) {
+        Logger logger= LogManager.getLogger(this.getClass());
         try {
             req.setCharacterEncoding("UTF-8");
         } catch (UnsupportedEncodingException e) {
@@ -36,12 +40,28 @@ public class Command {
         this.res = res;
     }
     public void process() {
-        logger.log(Level.DEBUG, "process()");
-
+        Logger logger= LogManager.getLogger(this.getClass());
+        Set<String> keys = req.getParameterMap().keySet();
+        StringBuilder stringBuilder = new StringBuilder("process()\n");
+        for (String key: keys) {
+            stringBuilder.append(key);
+            stringBuilder.append(" : ");
+            stringBuilder.append(Arrays.toString(req.getParameterMap().get(key)));
+        }
+        logger.log(Level.DEBUG, stringBuilder.toString());
     }
     public ArrayList<Integer> getListFromRequest() {
-        logger.log(Level.DEBUG, "getListFromRequest()");
+        Logger logger= LogManager.getLogger(this.getClass());
         ArrayList<Integer> list = new ArrayList<Integer>();
+        try {
+        Set<String> keys = req.getParameterMap().keySet();
+        StringBuilder stringBuilder = new StringBuilder("getListFromRequest()\n");
+        for (String key: keys) {
+            stringBuilder.append(key);
+            stringBuilder.append(" : ");
+            stringBuilder.append(Arrays.toString(req.getParameterMap().get(key)));
+        }
+        logger.log(Level.DEBUG, stringBuilder.toString());
         String[] remove = req.getParameterValues("remove");
         if (remove == null) {
             return list;
@@ -50,13 +70,13 @@ public class Command {
               list.add(Integer.valueOf(rem));
         }
         logger.log(Level.TRACE, String.format("getListFromRequest() returning %s", list.toString()));
+        } catch (Exception e) {
+            try {
+                res.sendRedirect("error.jsp?msg=1");
+            } catch (IOException e1) {
+                logger.log(Level.ERROR, ExceptionUtils.getStackTrace(e1));
+            }
+        }
         return list;
-    }
-    public static String getResourcesPath(HttpServletRequest req) {
-        File dir = new File(req.getServletContext().getRealPath("/"));
-        System.out.println(dir.getAbsolutePath());
-        dir = dir.getParentFile();
-        dir = dir.getParentFile();
-        return String.format("%s%ssrc%smain%swebapp%sresources%s", dir.getAbsolutePath(),  File.separator, File.separator, File.separator, File.separator, File.separator);
     }
 }

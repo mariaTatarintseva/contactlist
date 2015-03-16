@@ -4,7 +4,6 @@
     %>
 <%@ page import="dao.DataAccessObject" %>
 <%@ page import="java.io.InputStream" %>
-<%@ page import="java.io.File" %>
 <%@ page isELIgnored="false"%>
 <%@ taglib prefix="tbl" uri="contacts"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
@@ -18,7 +17,8 @@
     <title>Список контактов</title>
  </head>
 
-<body onload="initializePages()">
+<body>
+<%--// onload="initializePages()">--%>
 <%
     if (!DataAccessObject.isInit()) {
         Properties properties = new Properties();
@@ -39,14 +39,16 @@
         pageNumber = 0;
     }  else {
         pageNumber = Integer.valueOf(request.getParameter("pageNumber"));
-        onPage = Integer.valueOf(request.getParameter("onPage"));
+
     }
+    if (request.getParameter("pageNumber") != null) {
+    onPage = Integer.valueOf(request.getParameter("onPage"));
+    }
+    pageContext.setAttribute("onPage", onPage);
     if (request.getSession().getAttribute("results") != null) {
-     //  onPage=0;
         ids = (String) request.getSession().getAttribute("results");
         request.getSession().removeAttribute("results");
     }
-   // onPage = 10; //get from properties file
     int total = DataAccessObject.total();
 
 
@@ -67,7 +69,7 @@
 
      <div id="content">
 
-  <form action="FrontController">
+  <form action="FrontController" id="cntForm">
 
       <%if ("null".equals(ids))     { %>
 
@@ -77,22 +79,23 @@
       <%}%>
 
 <input type="hidden" name="command" id='com' value="DefaultValue">
-<input type="hidden" id='onPage' value="10">
-<input type="hidden" id='page' value="0">
 
-<input type="submit" value="Удалить выбранные" onclick="removeSelected()">
 
  </form>
-<button type="button" onclick="emailToSelected()">Написать письмо выбранным</button>
-<p>
+         <div class="rightFlow">
+<input type="submit" value="Удалить выбранные" onclick="removeSelected()" class="btnClass" form="cntForm">
+<button type="button" onclick="emailToSelected()" class="btnClass">Написать письмо выбранным</button>
+         </div>
+
+        <%if ("null".equals(ids))     { %>
 <table>
     <tr>
     <c:forEach var="i" begin="0" end="<%=(total-1)/onPage%>">
       <td>
-<form action="FrontController" name="page">
+<form action="FrontController" name="pageForm" id="pageForm">
     <input type="hidden" name="command" value="OpenPage">
-    <input type="hidden" name="page" value="${i}">
-    <input type="hidden" name="onPage" value="<%=onPage%>">
+    <input type="hidden" name="page" id="page" value="${i}">
+    <input type="hidden" name="onPage" id="onPage" value="<%=onPage%>">
     <input type="submit"  value="${i+1}" class="just_text">
     <%--<a href='FrontController' onclick="document.page.submit()"> <c:out value="${i}"></c:out> </a>--%>
 
@@ -100,7 +103,23 @@
       </td>
  </c:forEach>
     </tr>
-</table> </p>
+</table>
+         <div>
+             <label for="selectPage">Показывать на странице:</label>
+             <select form="pageForm" onchange="selectThePage()" id="selectPage">
+                 <c:choose>
+                     <c:when test="${onPage == 10}">
+                         <option value="10" selected="selected">10</option>
+                         <option value="20">20</option>
+                     </c:when>
+                     <c:otherwise>
+                         <option value="10">10</option>
+                         <option value="20" selected="selected">20</option>
+                     </c:otherwise>
+                 </c:choose>
+             </select>
+         </div>
+         <%}%>
  </div>
 
 <div id="footer">

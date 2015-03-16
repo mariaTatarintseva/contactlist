@@ -30,6 +30,16 @@
         </attribute>
     </tag>
     <tag>
+        <name>attachments</name>
+        <tag-class>view.AttachmentsViewHelper</tag-class>
+        <body-content>scriptless</body-content>
+        <attribute>
+            <name>id</name>
+            <type>int</type>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+    <tag>
         <name>result</name>
         <tag-class>view.SearchResultsHelper</tag-class>
         <body-content>scriptless</body-content>
